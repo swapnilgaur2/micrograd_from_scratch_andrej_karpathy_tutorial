@@ -1,2 +1,12 @@
 # micrograd_from_scratch_andrej_karpathy_tutorial
 A from-scratch implementation of a scalar-valued automatic differentiation (autograd) engine and a minimal neural network library built on top of it, inspired by Andrej Karpathy's "Spelled-out Intro to Neural Networks and Backpropagation."
+
+#The core of this project is a Value class that wraps individual numbers and tracks how each one was created. Every arithmetic operation — addition, multiplication, power, tanh — builds a computation graph automatically: each resulting Value stores its inputs and the operation that produced it. This graph is the foundation of automatic differentiation.
+Once the graph is built, the backward() method computes gradients for every node using reverse-mode automatic differentiation. It performs a topological sort to determine the correct order of traversal, then applies the chain rule at each node — multiplying the incoming gradient by the local derivative of that operation, and accumulating contributions when a value is used in multiple places.
+
+#On top of this engine sits a small neural network library — Neuron, Layer, and MLP classes — mirroring PyTorch's API design (__call__ for the forward pass, parameters() to collect trainable weights). Each neuron computes a weighted sum of its inputs plus a bias, passed through a tanh activation for non-linearity. Layers and networks compose neurons hierarchically, and the entire structure is fully differentiable end-to-end purely as a byproduct of the underlying Value graph.
+
+The project includes a full training loop on a toy binary classification dataset, demonstrating forward propagation, mean-squared-error loss computation, gradient zeroing, backpropagation, and gradient descent — the same four-step loop that underlies all modern deep learning training, regardless of scale.
+Results are validated against PyTorch: identical inputs run through both implementations produce matching gradients, confirming the engine's correctness against a production-grade framework.
+
+The purpose of this project isn't to build something usable in production — it's to demystify what frameworks like PyTorch and TensorFlow are actually doing under the hood. Modern deep learning's apparent complexity is almost entirely engineering: tensors instead of scalars, GPU kernels instead of Python loops, distributed training instead of single-threaded execution. The underlying algorithm — build a graph, walk it backward, apply the chain rule — is exactly what's implemented here
